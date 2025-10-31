@@ -6,7 +6,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 // Core
 import 'core/network/dio_client.dart';
-import 'presentation/auth/register_page.dart';
+
 // APIs
 import 'data/datasources/remote/auth_api.dart';
 import 'data/datasources/remote/exam_api.dart';
@@ -17,12 +17,17 @@ import 'data/repositories/auth_repository.dart';
 import 'data/repositories/student_repository.dart';
 import 'data/repositories/teacher_repository.dart';
 
-// Student UI
+// Auth UI
 import 'presentation/auth/login_page.dart';
+import 'presentation/auth/register_page.dart';
+
+// Student UI
 import 'presentation/student/student_home_page.dart';
 import 'presentation/student/exam_list_page.dart';
 import 'presentation/student/exam_detail_page.dart';
 import 'presentation/student/exam_result_page.dart';
+import 'presentation/student/student_history_page.dart';
+import 'presentation/student/student_history_detail_page.dart';
 
 // Teacher UI
 import 'presentation/teacher/teacher_home_page.dart';
@@ -30,6 +35,8 @@ import 'presentation/teacher/question_list_page.dart';
 import 'presentation/teacher/question_form_page.dart';
 import 'presentation/teacher/exam_create_page.dart';
 import 'presentation/teacher/exam_assign_page.dart';
+import 'presentation/teacher/classroom_manage_page.dart';
+import 'presentation/teacher/classroom_list_page.dart';
 
 // Bloc
 import 'state/auth/auth_bloc.dart';
@@ -50,6 +57,7 @@ class AppRoot extends StatelessWidget {
   late final _router = GoRouter(
     initialLocation: '/login',
     routes: [
+      // AUTH
       GoRoute(path: '/register', builder: (_, __) => const RegisterPage()),
       GoRoute(path: '/splash', builder: (_, __) => const _SplashGate()),
       GoRoute(path: '/login', builder: (_, __) => const LoginPage()),
@@ -71,6 +79,17 @@ class AppRoot extends StatelessWidget {
           return ExamResultPage(score: score['score'], total: score['total']);
         },
       ),
+      // LỊCH SỬ HỌC VIÊN
+      GoRoute(
+        path: '/student/history',
+        builder: (_, __) => const StudentHistoryPage(),
+      ),
+      GoRoute(
+        path: '/student/history/:attemptId',
+        builder: (ctx, state) => StudentHistoryDetailPage(
+          attemptId: int.parse(state.pathParameters['attemptId']!),
+        ),
+      ),
 
       // TEACHER
       GoRoute(path: '/teacher/home', builder: (_, __) => const TeacherHomePage()),
@@ -85,6 +104,16 @@ class AppRoot extends StatelessWidget {
       ),
       GoRoute(path: '/teacher/exams/new', builder: (_, __) => const ExamCreatePage()),
       GoRoute(path: '/teacher/exams/assign', builder: (_, __) => const ExamAssignPage()),
+
+      // 📚 CLASSROOM MANAGEMENT
+      GoRoute(
+        path: '/teacher/classrooms',
+        builder: (_, __) => const ClassroomListPage(),
+      ),
+      GoRoute(
+        path: '/teacher/classrooms/add',
+        builder: (_, __) => const ClassroomManagePage(),
+      ),
     ],
   );
 
@@ -94,7 +123,7 @@ class AppRoot extends StatelessWidget {
       providers: [
         RepositoryProvider.value(value: _authRepo),
         RepositoryProvider.value(value: _studentRepo),
-        RepositoryProvider.value(value: _teacherRepo), // ✅ Bổ sung cho Teacher
+        RepositoryProvider.value(value: _teacherRepo),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -103,6 +132,7 @@ class AppRoot extends StatelessWidget {
         ],
         child: MaterialApp.router(
           title: 'Quiz 15p',
+          debugShowCheckedModeBanner: false,
           theme: ThemeData(
             colorSchemeSeed: const Color(0xFF6E72FC),
             useMaterial3: true,

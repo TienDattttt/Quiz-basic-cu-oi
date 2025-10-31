@@ -21,4 +21,11 @@ class StudentRepository {
       answers: answers,
     );
   }
+
+  Future<List<Map<String, dynamic>>> getHistory(int studentId) =>
+      api.getExamHistory(studentId);
+
+  Future<Map<String, dynamic>> getHistoryDetail(int attemptId) =>
+      api.getExamHistoryDetail(attemptId);
+
 }

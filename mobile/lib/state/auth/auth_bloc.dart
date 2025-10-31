@@ -17,7 +17,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(state.copyWith(loading: true, error: null));
     try {
       final resp = await repo.login(e.username, e.password);
-      emit(AuthState(loading: false, token: resp.token, role: resp.role,));
+      print('📦 AuthBloc emit userId=${resp.userId}');
+      emit(AuthState(
+        loading: false,
+        token: resp.token,
+        role: resp.role,
+        userId: resp.userId, // ✅ thêm
+      ));
     } catch (err) {
       emit(AuthState(loading: false, error: err.toString()));
     }
@@ -35,9 +41,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onCheck(AuthCheckStatus e, Emitter<AuthState> emit) async {
     final token = await SecureStore.getToken();
-    final role  = await SecureStore.getRole();
+    final role = await SecureStore.getRole();
+    final userId = await SecureStore.getUserId(); // ✅ đọc lại từ storage
     if (token != null && role != null) {
-      emit(AuthState(loading: false, token: token, role: role));
+      emit(AuthState(
+        loading: false,
+        token: token,
+        role: role,
+        userId: userId,
+      ));
     } else {
       emit(initialAuthState);
     }

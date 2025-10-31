@@ -28,6 +28,112 @@ class _QuestionListPageState extends State<QuestionListPage> {
     _loadSubjects();
   }
 
+  // =================== SUBJECT CRUD ===================
+
+  Future<void> _createSubjectPopup() async {
+    final ctrl = TextEditingController();
+    final name = await showDialog<String>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: const Text('Thêm môn học mới'),
+        content: TextField(
+          controller: ctrl,
+          decoration: const InputDecoration(labelText: 'Tên môn học'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c), child: const Text('Hủy')),
+          FilledButton(onPressed: () => Navigator.pop(c, ctrl.text), child: const Text('Lưu')),
+        ],
+      ),
+    );
+    if (name == null || name.trim().isEmpty) return;
+
+    EasyLoading.show(status: 'Đang thêm...');
+    try {
+      final s = await repo.createSubject(name.trim());
+      subjects.add(s);
+      setState(() {
+        selectedSubject = s;
+      });
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Đã thêm môn học mới')));
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Thêm thất bại: $e')));
+    } finally {
+      EasyLoading.dismiss();
+    }
+  }
+
+  Future<void> _editSubject(Subject s) async {
+    final ctrl = TextEditingController(text: s.subjectName);
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: const Text('Chỉnh sửa môn học'),
+        content: TextField(controller: ctrl),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c), child: const Text('Hủy')),
+          FilledButton(onPressed: () => Navigator.pop(c, ctrl.text), child: const Text('Lưu')),
+        ],
+      ),
+    );
+    if (newName == null || newName.trim().isEmpty) return;
+
+    EasyLoading.show(status: 'Đang cập nhật...');
+    try {
+      final updated = await repo.updateSubject(s.id, newName.trim());
+      final idx = subjects.indexWhere((x) => x.id == s.id);
+      if (idx >= 0) subjects[idx] = updated;
+
+      // ✅ Fix lỗi DropdownButton: gán selectedSubject = updated object
+      if (selectedSubject?.id == updated.id) {
+        selectedSubject = updated;
+      }
+
+      setState(() {});
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Cập nhật thành công')));
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Lỗi cập nhật: $e')));
+    } finally {
+      EasyLoading.dismiss();
+    }
+  }
+
+  Future<void> _deleteSubject(Subject s) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: const Text('Xóa môn học?'),
+        content: Text('Bạn có chắc muốn xóa "${s.subjectName}"?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Hủy')),
+          FilledButton(onPressed: () => Navigator.pop(c, true), child: const Text('Xóa')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+
+    EasyLoading.show(status: 'Đang xóa...');
+    try {
+      await repo.deleteSubject(s.id);
+      subjects.removeWhere((x) => x.id == s.id);
+      if (selectedSubject?.id == s.id) selectedSubject = null;
+      setState(() {});
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Đã xóa thành công')));
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Xóa thất bại: $e')));
+    } finally {
+      EasyLoading.dismiss();
+    }
+  }
+
+  // =================== LOAD DATA ===================
+
   Future<void> _loadSubjects() async {
     setState(() => loading = true);
     try {
@@ -37,7 +143,8 @@ class _QuestionListPageState extends State<QuestionListPage> {
         await _loadQuestions();
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi tải môn học: $e')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Lỗi tải môn học: $e')));
     } finally {
       setState(() => loading = false);
     }
@@ -49,7 +156,8 @@ class _QuestionListPageState extends State<QuestionListPage> {
     try {
       items = await repo.getQuestionsBySubject(selectedSubject!.id);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi tải câu hỏi: $e')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Lỗi tải câu hỏi: $e')));
     } finally {
       setState(() => loading = false);
     }
@@ -75,11 +183,14 @@ class _QuestionListPageState extends State<QuestionListPage> {
       items.removeWhere((e) => e.id == id);
       setState(() {});
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Xóa thất bại: $e')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Xóa thất bại: $e')));
     } finally {
       EasyLoading.dismiss();
     }
   }
+
+  // =================== UI ===================
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +206,8 @@ class _QuestionListPageState extends State<QuestionListPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () => context.go('/teacher/questions/new', extra: selectedSubject),
+            onPressed: () =>
+                context.go('/teacher/questions/new', extra: selectedSubject),
           )
         ],
       ),
@@ -105,30 +217,69 @@ class _QuestionListPageState extends State<QuestionListPage> {
         children: [
           Padding(
             padding: const EdgeInsets.all(12),
-            child: DropdownButtonFormField<Subject>(
-              value: selectedSubject,
-              items: subjects
-                  .map((s) => DropdownMenuItem(value: s, child: Text(s.subjectName)))
-                  .toList(),
+            child: InputDecorator(
               decoration: const InputDecoration(
-                labelText: 'Môn học', border: OutlineInputBorder(),
+                labelText: 'Môn học',
+                border: OutlineInputBorder(),
               ),
-
-              // ✅ CHỈ GIỮ LẠI onChanged NÀY
-              onChanged: (v) async {
-                setState(() => selectedSubject = v);
-                await _loadQuestions();     // load lại danh sách câu hỏi theo môn
-              },
-
-              onSaved: (_) {},    // ✅ vẫn giữ được
-              onTap: () {},       // ✅ vẫn giữ được
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<Subject>(
+                  isExpanded: true,
+                  value: selectedSubject,
+                  items: [
+                    ...subjects.map(
+                          (s) => DropdownMenuItem(
+                        value: s,
+                        child: Row(
+                          mainAxisAlignment:
+                          MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(child: Text(s.subjectName)),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit,
+                                      size: 18, color: Colors.blue),
+                                  onPressed: () => _editSubject(s),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete,
+                                      size: 18, color: Colors.red),
+                                  onPressed: () => _deleteSubject(s),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const DropdownMenuItem(
+                      value: null,
+                      child: Text(
+                        '+ Thêm môn học mới',
+                        style: TextStyle(color: Colors.deepPurple),
+                      ),
+                    ),
+                  ],
+                  onChanged: (v) async {
+                    if (v == null) {
+                      await _createSubjectPopup();
+                    } else {
+                      setState(() => selectedSubject = v);
+                      await _loadQuestions();
+                    }
+                  },
+                ),
+              ),
             ),
           ),
           Expanded(
             child: ListView.separated(
               padding: const EdgeInsets.all(12),
               itemBuilder: (_, i) => _item(items[i]),
-              separatorBuilder: (_, __) => const SizedBox(height: 8),
+              separatorBuilder: (_, __) =>
+              const SizedBox(height: 8),
               itemCount: items.length,
             ),
           ),
@@ -149,17 +300,25 @@ class _QuestionListPageState extends State<QuestionListPage> {
       ),
       confirmDismiss: (_) async {
         await _delete(q.id);
-        return false; // mình tự xóa để tránh giật
+        return false; // tránh giật
       },
       child: ListTile(
         tileColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: Colors.deepPurple.shade50)),
-        title: Text(q.content, maxLines: 2, overflow: TextOverflow.ellipsis),
-        subtitle: Text('A. ${q.optionA} • B. ${q.optionB} • C. ${q.optionC} • D. ${q.optionD}',
-            maxLines: 1, overflow: TextOverflow.ellipsis),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.deepPurple.shade50),
+        ),
+        title: Text(q.content,
+            maxLines: 2, overflow: TextOverflow.ellipsis),
+        subtitle: Text(
+          'A. ${q.optionA} • B. ${q.optionB} • C. ${q.optionC} • D. ${q.optionD}',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
         trailing: IconButton(
           icon: const Icon(Icons.edit, color: Color(0xFF6E72FC)),
-          onPressed: () => context.go('/teacher/questions/${q.id}', extra: q),
+          onPressed: () =>
+              context.go('/teacher/questions/${q.id}', extra: q),
         ),
       ),
     );

@@ -31,7 +31,7 @@ class _ExamListPageState extends State<ExamListPage> {
         foregroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.go('/student/home'), // ✅ quay về Home học viên
         ),
       ),
       body: BlocConsumer<ExamBloc, ExamState>(
@@ -59,44 +59,72 @@ class _ExamListPageState extends State<ExamListPage> {
   }
 
   Widget _examCard(StudentExamItem e) {
+    final hasScore = e.score != null;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white, borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.deepPurple.shade50),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          )
+        ],
       ),
       child: Row(
         children: [
           Container(
-            width: 56, height: 56,
+            width: 56,
+            height: 56,
             decoration: BoxDecoration(
-              color: Colors.deepPurple.shade50, borderRadius: BorderRadius.circular(14),
+              color: Colors.deepPurple.shade50,
+              borderRadius: BorderRadius.circular(14),
             ),
             child: const Icon(Icons.quiz_outlined, color: Color(0xFF6E72FC)),
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(e.title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-              const SizedBox(height: 4),
-              Text('10 câu • ${e.durationMinutes} phút', style: TextStyle(color: Colors.grey.shade600)),
-            ]),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(e.title,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w700, fontSize: 16)),
+                const SizedBox(height: 4),
+                Text('10 câu • ${e.durationMinutes} phút',
+                    style: TextStyle(color: Colors.grey.shade600)),
+              ],
+            ),
           ),
           const SizedBox(width: 12),
-          FilledButton(
+
+          hasScore
+              ? Text(
+            '${e.score!.toStringAsFixed(1)}/10',
+            style: const TextStyle(
+                color: Colors.green,
+                fontWeight: FontWeight.bold,
+                fontSize: 16),
+          )
+              : FilledButton(
             onPressed: () {
               context.go('/student/exam/${e.examId}/detail');
             },
             style: FilledButton.styleFrom(
               backgroundColor: const Color(0xFF6E72FC),
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
             ),
             child: const Text('Bắt đầu'),
-          )
+          ),
         ],
       ),
     );
   }
+
 }

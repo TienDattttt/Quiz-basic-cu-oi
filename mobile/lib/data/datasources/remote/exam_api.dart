@@ -40,4 +40,24 @@ class ExamApi {
     );
     return SubmitResult.fromJson(res.data);
   }
+
+  Future<List<Map<String, dynamic>>> getExamHistory(int studentId) async {
+    final token = await SecureStore.getToken();
+    final res = await _dio.get(
+      '/api/student/history',
+      queryParameters: {'studentId': studentId},
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return (res.data as List).cast<Map<String, dynamic>>();
+  }
+
+  Future<Map<String, dynamic>> getExamHistoryDetail(int attemptId) async {
+    final token = await SecureStore.getToken();
+    final res = await _dio.get(
+      '/api/student/history/$attemptId',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return res.data as Map<String, dynamic>;
+  }
+
 }

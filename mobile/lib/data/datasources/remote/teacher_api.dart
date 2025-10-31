@@ -23,18 +23,8 @@ class TeacherApi {
   /// CLASSROOMS (nếu chưa có endpoint, dùng fallback mock)
   Future<List<Classroom>> getClassrooms() async {
     final token = await SecureStore.getToken();
-    try {
-      final res = await _dio.get('/api/classrooms', options: _authOptions(token!));
-      return (res.data as List).map((e) => Classroom.fromJson(e)).toList();
-    } catch (_) {
-      // fallback mock
-      return [
-        Classroom(id: 1, className: 'CNPM1'),
-        Classroom(id: 2, className: 'CNPM2'),
-        Classroom(id: 3, className: 'THMT'),
-        Classroom(id: 4, className: 'TMDT'),
-      ];
-    }
+    final res = await _dio.get('/api/classrooms', options: _authOptions(token!));
+    return (res.data as List).map((e) => Classroom.fromJson(e)).toList();
   }
 
   /// QUESTIONS
@@ -94,4 +84,64 @@ class TeacherApi {
         data: {'examId': examId, 'classId': classId},
         options: _authOptions(token!));
   }
+
+  // 🧑‍🎓 Lấy danh sách học viên chưa có lớp
+  Future<List<Map<String, dynamic>>> getAvailableStudents() async {
+    final token = await SecureStore.getToken();
+    final res = await _dio.get(
+      '/api/classrooms/students/available',
+      options: _authOptions(token!),
+    );
+    return (res.data as List).cast<Map<String, dynamic>>();
+  }
+
+// 🏫 Lấy danh sách học viên trong lớp
+  Future<List<Map<String, dynamic>>> getStudentsByClass(int classId) async {
+    final token = await SecureStore.getToken();
+    final res = await _dio.get(
+      '/api/classrooms/$classId/students',
+      options: _authOptions(token!),
+    );
+    return (res.data as List).cast<Map<String, dynamic>>();
+  }
+
+// ➕ Gán học viên vào lớp
+  Future<void> addStudentsToClass(int classId, List<int> studentIds) async {
+    final token = await SecureStore.getToken();
+    await _dio.post(
+      '/api/classrooms/$classId/students',
+      data: {'studentIds': studentIds},
+      options: _authOptions(token!),
+    );
+  }
+
+  // -----------------------------------
+// SUBJECT CRUD
+// -----------------------------------
+  Future<Subject> createSubject(String name) async {
+    final token = await SecureStore.getToken();
+    final res = await _dio.post(
+      '/api/subjects',
+      data: {'subjectName': name},
+      options: _authOptions(token!),
+    );
+    return Subject.fromJson(res.data);
+  }
+
+  Future<Subject> updateSubject(int id, String name) async {
+    final token = await SecureStore.getToken();
+    final res = await _dio.put(
+      '/api/subjects/$id',
+      data: {'subjectName': name},
+      options: _authOptions(token!),
+    );
+    return Subject.fromJson(res.data);
+  }
+
+  Future<void> deleteSubject(int id) async {
+    final token = await SecureStore.getToken();
+    await _dio.delete('/api/subjects/$id', options: _authOptions(token!));
+  }
+
+
 }

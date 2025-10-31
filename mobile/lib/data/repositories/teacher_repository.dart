@@ -26,4 +26,19 @@ class TeacherRepository {
 
   Future<void> assignExam({required int examId, required int classId}) =>
       api.assignExam(examId: examId, classId: classId);
+
+  Future<List<Map<String, dynamic>>> getAvailableStudents() =>
+      api.getAvailableStudents();
+
+  Future<List<Map<String, dynamic>>> getStudentsByClass(int classId) =>
+      api.getStudentsByClass(classId);
+
+  Future<void> addStudentsToClass(int classId, List<int> studentIds) =>
+      api.addStudentsToClass(classId, studentIds);
+
+  Future<Subject> createSubject(String name) => api.createSubject(name);
+  Future<Subject> updateSubject(int id, String name) => api.updateSubject(id, name);
+  Future<void> deleteSubject(int id) => api.deleteSubject(id);
+
+
 }

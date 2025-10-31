@@ -41,6 +41,9 @@ class TeacherHomePage extends StatelessWidget {
             _card(context, '🧾 Tạo đề thi random (10 câu)', '/teacher/exams/new'),
             const SizedBox(height: 12),
             _card(context, '🎯 Gán đề thi cho lớp', '/teacher/exams/assign'),
+            const SizedBox(height: 12),
+            _card(context, '👩‍🏫 Quản lí học viên', '/teacher/classrooms/'),
+
           ]),
         ),
       ),

@@ -57,10 +57,8 @@ class StudentHomePage extends StatelessWidget {
               const SizedBox(height: 12),
               _cardBig(
                 title: '🕘 Lịch sử làm bài',
-                subtitle: 'Xem điểm & lần làm trước',
-                onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('TODO: /student/history')),
-                ),
+                subtitle: 'Xem điểm và các lần làm bài trước',
+                onTap: () => context.go('/student/history'),
               ),
             ],
           ),

@@ -2,11 +2,12 @@ class AuthResponse {
   final String token;
   final String username;
   final String role;
+  final int userId;
 
-  AuthResponse({required this.token, required this.username, required this.role});
+  AuthResponse({required this.token, required this.username, required this.role, required this.userId,});
 
   factory AuthResponse.fromJson(Map<String, dynamic> j) =>
-      AuthResponse(token: j['token'], username: j['username'], role: j['role']);
+      AuthResponse(token: j['token'], username: j['username'], role: j['role'], userId: j['userId'] ?? j['uid'] ?? 0,);
 }
 
 class LoginRequest {

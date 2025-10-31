@@ -3,8 +3,10 @@ package com.microshop.backend.service.impl;
 import com.microshop.backend.dto.StudentExamResponse;
 import com.microshop.backend.entity.ClassroomStudent;
 import com.microshop.backend.entity.ExamAssignment;
+import com.microshop.backend.entity.ExamAttempt;
 import com.microshop.backend.repository.ClassroomStudentRepository;
 import com.microshop.backend.repository.ExamAssignmentRepository;
+import com.microshop.backend.repository.ExamAttemptRepository;
 import com.microshop.backend.service.StudentExamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ public class StudentExamServiceImpl implements StudentExamService {
 
     private final ClassroomStudentRepository classroomStudentRepo;
     private final ExamAssignmentRepository examAssignmentRepo;
+    private final ExamAttemptRepository examAttemptRepo;
 
     @Override
     public List<StudentExamResponse> getExamsByStudent(Integer studentId) {
@@ -39,6 +42,11 @@ public class StudentExamServiceImpl implements StudentExamService {
             res.setExamId(a.getExam().getId());
             res.setTitle(a.getExam().getTitle());
             res.setDurationMinutes(a.getExam().getDurationMinutes());
+
+            // 🔍 kiểm tra xem đã thi chưa
+            Optional<ExamAttempt> attempt = examAttemptRepo.findByAssignment_IdAndStudent_Id(a.getId(), studentId);
+            attempt.ifPresent(at -> res.setScore(at.getScore())); // ✅ nếu có, set điểm
+
             return res;
         }).toList();
     }

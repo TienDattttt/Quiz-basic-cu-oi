@@ -38,6 +38,7 @@ dependencies:
   lottie: ^3.1.2
   flutter_easyloading: ^3.0.5
   fluttertoast: ^8.2.6
+  intl: ^0.19.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
