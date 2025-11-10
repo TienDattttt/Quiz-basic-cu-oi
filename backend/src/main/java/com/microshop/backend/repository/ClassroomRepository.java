@@ -1,5 +1,6 @@
 package com.microshop.backend.repository;
 
+import com.microshop.backend.entity.Classroom;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.CrudRepository;
@@ -18,5 +19,7 @@ public interface ClassroomRepository extends CrudRepository<com.microshop.backen
 
     @Query(value = "EXEC sp_GetAvailableStudents", nativeQuery = true)
     List<Object[]> getAvailableStudents();
+
+    List<Classroom> findByTeacher_Id(Integer teacherId);
 
 }

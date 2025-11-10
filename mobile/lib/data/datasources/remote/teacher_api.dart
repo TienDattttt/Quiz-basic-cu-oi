@@ -9,6 +9,7 @@ import '../../models/exam_simple.dart';
 class TeacherApi {
   final Dio _dio;
   TeacherApi(this._dio);
+  Dio get client => _dio;
 
   Options _authOptions(String token) =>
       Options(headers: {'Authorization': 'Bearer $token'});

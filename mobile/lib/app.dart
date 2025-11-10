@@ -37,6 +37,9 @@ import 'presentation/teacher/exam_create_page.dart';
 import 'presentation/teacher/exam_assign_page.dart';
 import 'presentation/teacher/classroom_manage_page.dart';
 import 'presentation/teacher/classroom_list_page.dart';
+import 'presentation/teacher/teacher_result_page.dart';
+import 'presentation/teacher/teacher_result_exam_page.dart';
+import 'presentation/teacher/teacher_result_students_page.dart';
 
 // Bloc
 import 'state/auth/auth_bloc.dart';
@@ -57,12 +60,12 @@ class AppRoot extends StatelessWidget {
   late final _router = GoRouter(
     initialLocation: '/login',
     routes: [
-      // AUTH
+      // ================= AUTH =================
       GoRoute(path: '/register', builder: (_, __) => const RegisterPage()),
       GoRoute(path: '/splash', builder: (_, __) => const _SplashGate()),
       GoRoute(path: '/login', builder: (_, __) => const LoginPage()),
 
-      // STUDENT
+      // ================= STUDENT =================
       GoRoute(path: '/student/home', builder: (_, __) => const StudentHomePage()),
       GoRoute(path: '/student/exams', builder: (_, __) => const ExamListPage()),
       GoRoute(
@@ -79,7 +82,6 @@ class AppRoot extends StatelessWidget {
           return ExamResultPage(score: score['score'], total: score['total']);
         },
       ),
-      // LỊCH SỬ HỌC VIÊN
       GoRoute(
         path: '/student/history',
         builder: (_, __) => const StudentHistoryPage(),
@@ -91,7 +93,7 @@ class AppRoot extends StatelessWidget {
         ),
       ),
 
-      // TEACHER
+      // ================= TEACHER =================
       GoRoute(path: '/teacher/home', builder: (_, __) => const TeacherHomePage()),
       GoRoute(path: '/teacher/questions', builder: (_, __) => const QuestionListPage()),
       GoRoute(path: '/teacher/questions/new', builder: (_, __) => const QuestionFormPage()),
@@ -113,6 +115,27 @@ class AppRoot extends StatelessWidget {
       GoRoute(
         path: '/teacher/classrooms/add',
         builder: (_, __) => const ClassroomManagePage(),
+      ),
+
+      // ================= TEACHER RESULTS =================
+      GoRoute(
+        path: '/teacher/results',
+        builder: (_, __) => const TeacherResultPage(),
+      ),
+      GoRoute(
+        path: '/teacher/results/:classId/exams',
+        builder: (ctx, st) =>
+            TeacherResultExamPage(classId: int.parse(st.pathParameters['classId']!)),
+      ),
+      GoRoute(
+        path: '/teacher/results/exam/:examId/students',
+        builder: (ctx, st) => TeacherResultStudentsPage(
+            examId: int.parse(st.pathParameters['examId']!)),
+      ),
+      GoRoute(
+        path: '/teacher/results/attempt/:attemptId',
+        builder: (ctx, st) => StudentHistoryDetailPage(
+            attemptId: int.parse(st.pathParameters['attemptId']!)),
       ),
     ],
   );
@@ -146,7 +169,7 @@ class AppRoot extends StatelessWidget {
   }
 }
 
-// Splash → chuyển hướng tùy role
+// ================= Splash =================
 class _SplashGate extends StatelessWidget {
   const _SplashGate();
 
